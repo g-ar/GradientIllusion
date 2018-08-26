@@ -51,8 +51,19 @@ Window {
                     backAnimY.from = rect.y;
                     backAnimY.to = beginDrag.y;
                     backAnim.start()
+                    rotate.start()
                 }
             }
+            RotationAnimation {
+                        id: rotate
+                        target:rect
+                        property: "rotation"
+                        from: 0
+                        to: 90
+                        duration: 400
+                        direction: RotationAnimation.Clockwise
+                    }
+
             ParallelAnimation {
                 id: backAnim
                 SpringAnimation { id: backAnimX; target: rect; property: "x"; duration: 800; spring: 3; damping: 0.2 }
