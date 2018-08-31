@@ -9,11 +9,13 @@ Window {
     title: qsTr("Gradient Illusion")
     property string colorRect : "#000000"
     property string colorBoxes: "#7f7f7f"
+    property int sqlen: 100
     Rectangle {
         width: parent.height
         height: parent.width
         anchors.centerIn: parent
-        rotation: 90
+        rotation: -90
+
         gradient: Gradient {
                   GradientStop { position: 0.0; color: colorRect }
                   GradientStop { position: 1.0; color: "#ffffff" }
@@ -23,52 +25,46 @@ Window {
         radius: 1
     }
 
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        onPressed: {
+            var clr = (mouse.x/Screen.width)
+            modelTest.append({
+                                 "x": (mouse.x - sqlen/2).toString(),
+                                 "y": (mouse.y-sqlen/2).toString(),
+                                 "color": Qt.rgba(clr,clr,clr).toString()
+                             })
+
+        }
+    }
+
     Repeater {
-        model: 6
-        Rectangle {
+        model: ListModel {
+            id: modelTest
+        }
+
+        delegate: Rectangle {
             id: rect
-            width: 200
-            height: 200
-            z: mouseArea.drag.active ||  mouseArea.pressed ? 2 : 1
-            color: colorBoxes
-            x: index * ((parent.width-width)/5)
-            y: (parent.height-height)/2
+            width: sqlen
+            height: sqlen
+            z: mouseAreaInt.drag.active ||  mouseAreaInt.pressed ? 2 : 1
+            color: model.color
+            x: model.x
+            y: model.y
             property point beginDrag
-            border { width:1; color: "#000000" }
+            border { width:0; color: "#000000" }
             radius: 5
-            Drag.active: mouseArea.drag.active
+            Drag.active: mouseAreaInt.drag.active
+
 
             MouseArea {
-                id: mouseArea
+                id: mouseAreaInt
                 anchors.fill: parent
-                drag.target: parent
-                onPressed: {
-                    rect.beginDrag = Qt.point(rect.x, rect.y);
-                }
-                onReleased: {
-                    backAnimX.from = rect.x;
-                    backAnimX.to = beginDrag.x;
-                    backAnimY.from = rect.y;
-                    backAnimY.to = beginDrag.y;
-                    backAnim.start()
-                    rotate.start()
-                }
+                drag.target: rect
             }
-            RotationAnimation {
-                        id: rotate
-                        target:rect
-                        property: "rotation"
-                        from: 0
-                        to: 90
-                        duration: 400
-                        direction: RotationAnimation.Clockwise
-                    }
 
-            ParallelAnimation {
-                id: backAnim
-                SpringAnimation { id: backAnimX; target: rect; property: "x"; duration: 800; spring: 3; damping: 0.2 }
-                SpringAnimation { id: backAnimY; target: rect; property: "y"; duration: 800; spring: 3; damping: 0.2 }
-            }
         }
     }
 }
